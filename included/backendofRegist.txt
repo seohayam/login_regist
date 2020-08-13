@@ -1,0 +1,72 @@
+登録画面のバックエンド部分です
+流れ
+1
+POSTのsubmitがあるかを確認 > mysqlと接続処理をする（database.phpを使って）
+> POSTされた変数をそれぞれ作る($name,$password,confirmed)
+> 三つの変数のどれかひつでも空欄があれば
+> 最初の登録画面にエラー表示とともに戻る（注意：その際、処理をexit()で終了させる事）
+> $nameの内容がa~z,A~Z,0~9のどれかに当てはまるようにする事
+> $passwordと＄confirmedが一致するかを処理する
+> 合わなければ、登録画面へ
+2
+SELECT
+> SELECTをする（その範囲のどれでも = ?）
+> 現状のコネクションを初期化する
+> コネクションとSELECTの準備をし、整えば、先に進み
+> 整わなければ、登録画面に戻る
+> 整えば、データベースとポストされたnameを紐付け（mysqli_bind_param()）
+> そして、コネクションと接続開始の合図（mysqli_stmt_excute()）
+> そして、そして、一時的に、紐付けされたデータ（データベースとpostされたname）を保管（mysqli_stmt_store_result()）
+> さらに、紐付けが完了された$stmtのデータベスにあるrowを数える
+> もし、それが、0よりも多かったら、SELECTされたデータがエータベースにあるっちゅう事やねん
+> せやから、登録画面に戻って
+> 0より少なかったら、つまり、0だったら、新しいデータですので
+3
+INSERT
+> INSERTしましょうや
+> そんで持ってもう一回初期化します。
+> それからもう一回、INSERTと初期化したconectionをprepareします（それを$stmtと呼びます）
+> もし、準備できんかったら、登録画面に戻ります
+> そうでなかったらpostされたパスワードを暗号化します
+> そして、baindして、excuteします
+> その後は、登録成功画面に映るか、登録画面に戻るかのどちらかをします
+> 最後に、mysqli_stmtとmysqliを閉じて終了です
+
+
+
+
+
+new function and new word
+＞?の意味　なんでもオッケー（文字列）＝　ワイルドカード
+元々、入力された文字列の値 = ?　の様な性質がある
+WHERE name = ?
+
+＞指定された文字列に指定した（a~z,A~Z,0~9)ものが含まれているかを検索する機能
+preg_match("/^[a-zA-Z0-9]*/",$name);
+
+＞今の状況を初期化し、stmt_prepare（）で使用する変数を作ります。
+mysqli_stmt_init();
+
+＞準備
+mysqli_stmt_prepare();
+
+＞parameter=変数　つまり、変数をデータベースと紐付けする
+mysqli_bind_param();
+
+＞excute=実行する
+mysqli_stmt_excute();
+
+＞現状のデータを保存する。また、データを取得するにはmysqli_fettch_arayをする必要がある
+mysqli_stmt_store_result();
+
+＞今の状況のrowを数える
+mysqli_stmt_num_row
+
+＞パスワードを暗号化
+password_hash($~,PASSWORD_DEFAULT);
+
+＞現状のコネクションを閉じる
+mysqli_stmt_close($~);
+
+＞mysqliを閉じる
+mysqli_close();
